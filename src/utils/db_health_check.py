@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from dataclasses import dataclass
 
-from config.database import engine
+from src.config.database import engine
 
 
 @dataclass

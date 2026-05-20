@@ -1,10 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
-from config.settings import settings
-from utils.db_health_check import check_db_health
+from src.config.settings import settings
+from src.utils.db_health_check import check_db_health
 
 app = FastAPI()
+
+app.mount("/media", StaticFiles(directory="media"), name="media")
 
 
 @app.get("/health")
