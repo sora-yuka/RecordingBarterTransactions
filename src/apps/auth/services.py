@@ -1,4 +1,4 @@
-from fastapi import Request, HTTPException, status
+from fastapi import HTTPException, status
 
 from sqlalchemy import select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -14,7 +14,7 @@ class UserService:
 
     async def _get_user_by_id(self, user_id: int) -> UserModel | None:
         result = await self.session.execute(
-            select(UserModel).where(UserModel.id == user_id)
+            select(UserModel).where(UserModel.id == int(user_id))
         )
         return result.scalars().one_or_none()
 
@@ -48,4 +48,16 @@ class UserService:
         return new_user
 
     async def authenticate_user(self, login_data: LoginSchema) -> UserModel:
-        user = await self._get_user_by_id
+        user = await self._get_user_by_phone(login_data.phone_number)
+        if not user:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect phone number or password",
+            )
+        is_password_valid = password_hasher.verify(login_data.password, user.password)
+        if not is_password_valid:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Incorrect phone number or password",
+            )
+        return user

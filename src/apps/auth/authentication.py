@@ -16,7 +16,7 @@ def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -
         expires_delta or timedelta(minutes=settings.access_token_expire_minutes)
     )
     to_encode.update({"exp": expire, "type": "access"})
-    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return jwt.encode(to_encode, str(settings.secret_key), algorithm=settings.algorithm)
 
 
 def create_refresh_token(data: dict) -> str:
@@ -25,7 +25,7 @@ def create_refresh_token(data: dict) -> str:
         days=settings.refresh_token_expire_days
     )
     to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, settings.secret_key, algorithm=settings.algorithm)
+    return jwt.encode(to_encode, str(settings.secret_key), algorithm=settings.algorithm)
 
 
 def raise_401_status(detail: str) -> None:
@@ -38,7 +38,7 @@ def raise_401_status(detail: str) -> None:
 
 def decode_token(token: str, expected_type: str = "access") -> dict:
     try:
-        payload = jwt.decode(token, settings.secret_key, algorithms=settings.algorithm)
+        payload = jwt.decode(token, str(settings.secret_key), algorithms=settings.algorithm)
     except JWTError:
         raise_401_status("Cound not validate credentials")
 

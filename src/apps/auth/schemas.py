@@ -28,7 +28,7 @@ class ReadUserSchema(BaseUserSchema):
 
 
 class LoginSchema(BaseModel):
-    username: str
+    phone_number: PhoneNumber
     password: str
 
 
