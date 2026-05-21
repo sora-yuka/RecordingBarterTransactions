@@ -10,6 +10,9 @@ class Settings(BaseSettings):
     port: int = Field(alias="PORT")
     secret_key: SecretStr = Field(alias="SECRET_KEY")
     DATABASE_URL: PostgresDsn
+    algorithm: str
+    access_token_expire_minutes: int
+    refresh_token_expire_days: int
 
     model_config = SettingsConfigDict(env_file=find_env_file())
 
