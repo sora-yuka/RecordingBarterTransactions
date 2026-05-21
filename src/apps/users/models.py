@@ -7,12 +7,11 @@ from sqlalchemy.sql import func
 from src.config.database import Base
 
 
-class User(Base):
+class UserModel(Base):
     __tablename__ = "users_account"
 
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
     username: Mapped[str] = mapped_column(String(150))
-    email: Mapped[str] = mapped_column(String(255), unique=True)
     password: Mapped[str] = mapped_column(String(255))
     profile_photo: Mapped[str | None] = mapped_column(String(200), default=None)
     phone_number: Mapped[str] = mapped_column(unique=True)
