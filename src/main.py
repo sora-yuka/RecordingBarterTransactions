@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 
 from src.config.settings import settings
 from src.utils.db_health_check import check_db_health
-from src.apps.users.routers import router as user_router
+from src.apps.auth.routers import router as user_router
 
 app = FastAPI()
 
@@ -20,7 +20,7 @@ async def health_check():
     }
 
 
-app.include_router(user_router, prefix="/api/v1/users", tags=["users"])
+app.include_router(user_router, prefix="/api/v1/auth", tags=["auth"])
 
 
 if __name__ == "__main__":
