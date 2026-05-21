@@ -1,20 +1,27 @@
 from datetime import datetime
+from typing_extensions import Self
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, Field, model_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class BaseUserSchema(BaseModel):
     username: str
-    email: EmailStr
     phone_number: PhoneNumber
 
 
-class UserCreateSchema(BaseUserSchema):
+class CreateUserSchema(BaseUserSchema):
     password: str = Field(min_length=6)
+    password_confirm: str = Field(min_length=6, exclude=True)
+
+    @model_validator(mode="after")
+    def verify_password(self) -> Self:
+        if self.password != self.password_confirm:
+            raise ValueError("Passwords do not match")
+        return self
 
 
-class UserPublicSchema(BaseUserSchema):
+class ReadUserSchema(BaseUserSchema):
     id: int
-    photo_profile: str | None
+    profile_photo: str | None
     created_at: datetime
