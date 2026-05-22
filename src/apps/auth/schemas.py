@@ -27,7 +27,7 @@ class ReadUserSchema(BaseUserSchema):
     created_at: datetime
 
 
-class LoginSchema(BaseModel):
+class AuthorizeUserSchema(BaseModel):
     phone_number: PhoneNumber
     password: str
 

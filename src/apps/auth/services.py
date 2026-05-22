@@ -1,10 +1,13 @@
-from fastapi import HTTPException, status
-
-from sqlalchemy import select, update, delete
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import UserModel
-from .schemas import CreateUserSchema, LoginSchema
+from .schemas import CreateUserSchema, AuthorizeUserSchema, TokenSchema
+from .authentication import create_access_token, create_refresh_token, decode_token
+from .exceptions import (
+    UserAlreadyExistsException,
+    InvalidCredentialsException,
+)
 from src.utils.password_hasher import password_hasher
 
 
@@ -12,52 +15,49 @@ class UserService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _get_user_by_id(self, user_id: int) -> UserModel | None:
-        result = await self.session.execute(
-            select(UserModel).where(UserModel.id == int(user_id))
-        )
+    async def _get_user_by_field(self, **kwargs) -> UserModel | None:
+        if not kwargs:
+            return None
+        filters = [getattr(UserModel, key) == val for key, val in kwargs.items()]
+        result = await self.session.execute(select(UserModel).where(*filters))
         return result.scalars().one_or_none()
 
-    async def _get_user_by_phone(self, phone_number: str) -> UserModel | None:
-        result = await self.session.execute(
-            select(UserModel).where(UserModel.phone_number == phone_number)
-        )
-        return result.scalars().one_or_none()
-
-    async def _get_user_by_username(self, username: str) -> UserModel | None:
-        result = await self.session.execute(
-            select(UserModel).where(UserModel.username == username)
-        )
-        return result.scalars().one_or_none()
-
-    async def create_user(self, user: CreateUserSchema) -> UserModel:
-        if await self._get_user_by_phone(user.phone_number):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="User with this phone number already exists",
+    async def create_user(self, user_data: CreateUserSchema) -> UserModel:
+        if await self._get_user_by_field(phone_number=user_data.phone_number):
+            raise UserAlreadyExistsException(
+                "User with this phone number already exists"
             )
 
-        data = user.model_dump()
+        data = user_data.model_dump()
         data["password"] = password_hasher.hash(data["password"])
 
         new_user = UserModel(**data)
-
         self.session.add(new_user)
+
         await self.session.commit()
         await self.session.refresh(new_user)
         return new_user
 
-    async def authenticate_user(self, login_data: LoginSchema) -> UserModel:
-        user = await self._get_user_by_phone(login_data.phone_number)
-        if not user:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect phone number or password",
-            )
-        is_password_valid = password_hasher.verify(login_data.password, user.password)
-        if not is_password_valid:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Incorrect phone number or password",
-            )
+    async def authenticate_user(self, login_data: AuthorizeUserSchema) -> UserModel:
+        user = await self._get_user_by_field(phone_number=login_data.phone_number)
+
+        if not user or not password_hasher.verify(login_data.password, user.password):
+            raise InvalidCredentialsException("Incorrect phone number or password")
+
         return user
+
+    def generate_tokens(self, user_id: int, phone_number: str) -> TokenSchema:
+        token_payload = {"sub": str(user_id), "phone": phone_number}
+        return TokenSchema(
+            access_token=create_access_token(token_payload),
+            refresh_token=create_refresh_token(token_payload),
+        )
+
+    async def refresh_user_tokens(self, refresh_token: str) -> TokenSchema:
+        payload = decode_token(token=refresh_token, expected_type="refresh")
+
+        user = await self._get_user_by_field(id=int(payload.get("sub")))
+        if not user:
+            raise InvalidCredentialsException("User no longer exists")
+
+        return self.generate_tokens(user.id, user.phone_number)
