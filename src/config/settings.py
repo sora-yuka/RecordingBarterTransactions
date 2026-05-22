@@ -1,25 +1,27 @@
-from src.utils.get_env_file import find_env_file
-
 from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 
 class Settings(BaseSettings):
-    host: str = Field(alias="HOST")
-    port: int = Field(alias="PORT")
-    secret_key: SecretStr = Field(alias="SECRET_KEY")
+    HOST: str
+    PORT: int
+    SECRET_KEY: SecretStr
     DATABASE_URL: PostgresDsn
-    algorithm: str
-    access_token_expire_minutes: int
-    refresh_token_expire_days: int
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+    REFRESH_TOKEN_EXPIRE_DAYS: int
 
-    model_config = SettingsConfigDict(env_file=find_env_file())
+    model_config = SettingsConfigDict(env_file=".env")
 
     @property
     def async_database_url(self):
         # postgresql+asyncpg://user:password@localhost:5432/db_name
         return str(self.DATABASE_URL)
+
+    @property
+    def secret_key_str(self):
+        return str(self.SECRET_KEY)
 
 
 settings = Settings()
