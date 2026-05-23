@@ -1,18 +1,19 @@
 from fastapi import APIRouter, HTTPException, status
 
-from .dependencies import ServiceDep, CredentialsDep
-from .schemas import CreateUserSchema, ReadUserSchema, AuthorizeUserSchema, TokenSchema
+from .dependencies import ServiceDep, UserRegisterFormDep
+from .schemas import ReadUserSchema, AuthorizeUserSchema, TokenSchema
 from .exceptions import (
     UserAlreadyExistsException,
     InvalidCredentialsException,
     InvalidTokenException,
 )
+from src.dependencies import CredentialsDep
 
 router = APIRouter()
 
 
 @router.post("/register", response_model=ReadUserSchema)
-async def register(user: CreateUserSchema, service: ServiceDep):
+async def register(user: UserRegisterFormDep, service: ServiceDep):
     try:
         return await service.create_user(user)
     except UserAlreadyExistsException as e:
@@ -28,7 +29,7 @@ async def login(data: AuthorizeUserSchema, service: ServiceDep):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
 
 
-@router.post("/refresh")
+@router.post("/refresh", response_model=TokenSchema)
 async def refresh(credentials: CredentialsDep, service: ServiceDep):
     try:
         return await service.refresh_user_tokens(credentials.credentials)
