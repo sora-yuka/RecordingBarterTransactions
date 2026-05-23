@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing_extensions import Self
 
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
@@ -24,8 +24,10 @@ class CreateUserSchema(BaseUserSchema):
 
 class ReadUserSchema(BaseUserSchema):
     id: int
-    profile_photo: str | None
+    photo_url: str | None = None
     created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class AuthorizeUserSchema(BaseModel):
