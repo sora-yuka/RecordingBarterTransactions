@@ -3,12 +3,12 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 
 from src.config.settings import settings
-from src.utils.db_health_check import check_db_health
+from src.utils.health_check_handler import check_db_health
 from src.apps.auth.routers import router as user_router
 
 app = FastAPI()
 
-app.mount("/media", StaticFiles(directory="media"), name="media")
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
 
 
 @app.get("/health")
