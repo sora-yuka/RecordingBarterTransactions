@@ -1,5 +1,5 @@
 run:
-	uvicorn src.main:app
+	python -m src.main
 revision:
 	alembic revision --autogenerate
 upgrade:
