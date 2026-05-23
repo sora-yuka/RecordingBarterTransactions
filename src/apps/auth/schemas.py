@@ -11,6 +11,7 @@ class BaseUserSchema(BaseModel):
 
 
 class CreateUserSchema(BaseUserSchema):
+    profile_photo: str | None = None
     password: str = Field(min_length=6)
     password_confirm: str = Field(min_length=6, exclude=True)
 
