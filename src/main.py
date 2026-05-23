@@ -25,7 +25,7 @@ app.include_router(user_router, prefix="/api/v1/auth", tags=["auth"])
 
 if __name__ == "__main__":
     uvicorn.run(
-        "main:app",
+        "src.main:app",
         host=settings.HOST,
         port=settings.PORT,
         reload=True,
