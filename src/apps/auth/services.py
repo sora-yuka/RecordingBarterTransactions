@@ -8,7 +8,7 @@ from .exceptions import (
     UserAlreadyExistsException,
     InvalidCredentialsException,
 )
-from src.utils.password_hasher import password_hasher
+from src.utils.password_handler import password_hasher
 
 
 class UserService:
