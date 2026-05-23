@@ -35,3 +35,8 @@ async def refresh(credentials: CredentialsDep, service: ServiceDep):
         return await service.refresh_user_tokens(credentials.credentials)
     except InvalidTokenException as e:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+
+
+@router.get("/me", response_model=ReadUserSchema)
+async def get_me(credentials: CredentialsDep, service: ServiceDep):
+    return await service.get_current_user(credentials.credentials)
