@@ -2,7 +2,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from .models import UserModel
-from .schemas import CreateUserSchema, AuthorizeUserSchema, TokenSchema
+from .schemas import CreateUserSchema, ReadUserSchema, AuthorizeUserSchema, TokenSchema
 from .authentication import create_access_token, create_refresh_token, decode_token
 from .exceptions import (
     UserAlreadyExistsException,
@@ -57,7 +57,11 @@ class UserService:
         payload = decode_token(token=refresh_token, expected_type="refresh")
 
         user = await self._get_user_by_field(id=int(payload.get("sub")))
-        if not user:
-            raise InvalidCredentialsException("User no longer exists")
 
         return self.generate_tokens(user.id, user.phone_number)
+
+    async def get_current_user(self, credentials_str: str) -> ReadUserSchema:
+        payload = decode_token(token=credentials_str)
+
+        user = await self._get_user_by_field(id=int(payload.get("sub")))
+        return ReadUserSchema.model_validate(user)
