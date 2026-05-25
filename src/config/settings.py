@@ -2,7 +2,6 @@ from pydantic import Field, PostgresDsn, SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-
 class Settings(BaseSettings):
     HOST: str
     PORT: int
@@ -11,6 +10,7 @@ class Settings(BaseSettings):
     ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+    CORS_ALLOWED_ORIGINS: list[str]
 
     model_config = SettingsConfigDict(env_file=".env")
 
