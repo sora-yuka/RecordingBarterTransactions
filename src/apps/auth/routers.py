@@ -1,42 +1,26 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter
 
-from .dependencies import ServiceDep, UserRegisterFormDep
-from .schemas import ReadUserSchema, AuthorizeUserSchema, TokenSchema
-from .exceptions import (
-    UserAlreadyExistsException,
-    InvalidCredentialsException,
-    InvalidTokenException,
-)
-from src.dependencies import CredentialsDep
+from src.apps.auth.schemas import ReadUserSchema, AuthorizeUserSchema, TokenSchema
+from src.apps.auth.dependencies import UserServiceDep, AuthServiceDep, UserFormDep, CredentialsDep
 
 router = APIRouter()
 
 
-@router.post("/register", response_model=ReadUserSchema)
-async def register(user: UserRegisterFormDep, service: ServiceDep):
-    try:
-        return await service.create_user(user)
-    except UserAlreadyExistsException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+@router.post("/enroll", response_model=ReadUserSchema)
+async def enroll(service: UserServiceDep, form_data: UserFormDep):
+    return await service.create_user(form_data)
 
 
-@router.post("/login", response_model=TokenSchema)
-async def login(data: AuthorizeUserSchema, service: ServiceDep):
-    try:
-        user = await service.authenticate_user(data)
-        return service.generate_tokens(user.id, user.phone_number)
-    except InvalidCredentialsException as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e))
+@router.post("/authorize", response_model=TokenSchema)
+async def authorize(service: AuthServiceDep, json_data: AuthorizeUserSchema):
+    return await service.authenticate_user(json_data)
 
 
-@router.post("/refresh", response_model=TokenSchema)
-async def refresh(credentials: CredentialsDep, service: ServiceDep):
-    try:
-        return await service.refresh_user_tokens(credentials.credentials)
-    except InvalidTokenException as e:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+@router.post("/refresh")
+async def refresh(service: AuthServiceDep, headers: CredentialsDep):
+    return await service.refresh_user_tokens(headers.credentials)
 
 
-@router.get("/me", response_model=ReadUserSchema)
-async def get_me(credentials: CredentialsDep, service: ServiceDep):
-    return await service.get_current_user(credentials.credentials)
+@router.get("/", response_model=ReadUserSchema)
+async def get_me(service: UserServiceDep, headers: CredentialsDep):
+    return await service.get_current_user(headers.credentials)

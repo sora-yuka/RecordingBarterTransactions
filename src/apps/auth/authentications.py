@@ -3,8 +3,8 @@ from datetime import timedelta, datetime, timezone
 
 from jose import ExpiredSignatureError, JWTError, jwt
 
-from .exceptions import TokenExpiredException, InvalidTokenException
 from src.config.settings import settings
+from src.apps.auth.exceptions import TokenExpiredException, InvalidTokenException
 
 
 class TokenType(str, Enum):
@@ -37,12 +37,12 @@ def decode_token(token: str, expected_type: TokenType = TokenType.ACCESS) -> dic
             token, settings.secret_key_str, algorithms=[settings.ALGORITHM]
         )
     except ExpiredSignatureError:
-        raise TokenExpiredException("Token has expired")
+        raise TokenExpiredException()
     except JWTError:
-        raise InvalidTokenException("Could not validate credentials")
+        raise InvalidTokenException()
 
     if not payload.get("sub"):
-        raise InvalidTokenException("Could not validate credentials")
+        raise InvalidTokenException()
 
     if payload.get("type") != expected_type.value:
         raise InvalidTokenException(f"Expected a {expected_type.value} token")

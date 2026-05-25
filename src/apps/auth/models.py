@@ -2,7 +2,6 @@ from datetime import datetime, timezone
 
 from sqlalchemy import String, DateTime
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql import func
 
 from src.config.database import Base
 
