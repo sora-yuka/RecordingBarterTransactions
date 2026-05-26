@@ -10,6 +10,7 @@ from alembic import context
 from src.config.settings import settings
 from src.config.database import Base
 from src.apps.auth.models import UserModel
+from src.apps.barter.models import BarterModel, BarterMediaModel, BarterDealModel
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
