@@ -21,6 +21,6 @@ async def refresh(service: AuthServiceDep, headers: CredentialsDep):
     return await service.refresh_user_tokens(headers.credentials)
 
 
-@router.get("/", response_model=ReadUserSchema)
+@router.get("", response_model=ReadUserSchema)
 async def get_me(current_user: CurrentUserDep):
     return current_user
