@@ -14,23 +14,23 @@ from src.utils.password_handler import password_hasher
 
 
 class UserService:
-    def __init__(self, repository: UserRepository):
-        self.repository = repository
+    def __init__(self, repo: UserRepository):
+        self.repo = repo
 
     async def create_user(self, user_data: CreateUserSchema) -> ReadUserSchema:
-        if await self.repository.get_by_field(phone_number=user_data.phone_number):
+        if await self.repo.get_by_field(phone_number=user_data.phone_number):
             raise UserAlreadyExistsException()
 
         data = user_data.model_dump()
         data["password"] = password_hasher.hash(data["password"])
 
-        new_user = await self.repository.create(data)
+        new_user = await self.repo.create(data)
         return ReadUserSchema.model_validate(new_user)
 
     async def get_current_user(self, credentials: str) -> ReadUserSchema:
         payload = decode_token(token=credentials)
 
-        user = await self.repository.get_by_field(id=int(payload.get("sub")))
+        user = await self.repo.get_by_field(id=int(payload.get("sub")))
         return ReadUserSchema.model_validate(user)
 
 
