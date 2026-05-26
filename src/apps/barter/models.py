@@ -49,6 +49,8 @@ class BarterModel(Base):
 
 
 class BarterDealModel(Base):
+    __tablename__ = "barter_deals"
+
     id: Mapped[int] = mapped_column(primary_key=True)
     initiator_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
     responder_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
