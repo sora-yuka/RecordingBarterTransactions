@@ -4,7 +4,7 @@ from sqlalchemy import ForeignKey, String, DateTime, Text, Enum
 from sqlalchemy.orm import Mapped, relationship, mapped_column
 
 from src.config.database import Base
-from src.apps.barter.enums import ItemCategory, MediaType
+from src.apps.barter.enums import ItemCategory, MediaType, BarterStatus, DealStatus
 
 
 class BarterMediaModel(Base):
@@ -34,7 +34,9 @@ class BarterModel(Base):
         Enum(ItemCategory), nullable=False, default=ItemCategory.OTHER
     )
     desired_offer: Mapped[str | None] = mapped_column(nullable=True, default=None)
-    status: Mapped[bool] = mapped_column(default=True)
+    status: Mapped[BarterStatus] = mapped_column(
+        Enum(BarterStatus), default=BarterStatus.ACTIVE
+    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         default=lambda: datetime.now(timezone.utc),
@@ -44,7 +46,24 @@ class BarterModel(Base):
         default=lambda: datetime.now(timezone.utc),
         onupdate=lambda: datetime.now(timezone.utc),
     )
+
+
+class BarterDealModel(Base):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    initiator_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
+    responder_id: Mapped[int] = mapped_column(ForeignKey("users_account.id"))
+    status: Mapped[DealStatus] = mapped_column(
+        Enum(DealStatus), default=DealStatus.PROPOSED
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
+    )
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone.utc),
+        default=lambda: datetime.now(timezone.utc),
+        onupdate=lambda: datetime.now(timezone.utc),
+    )
     completed_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        default=None,
+        DateTime(timezone.utc),
     )
