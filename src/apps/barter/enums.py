@@ -13,3 +13,16 @@ class ItemCategory(Enum):
 class MediaType(Enum):
     IMAGE = "image"
     VIDEO = "video"
+
+
+class BarterStatus(Enum):
+    ACTIVE = "active"
+    EXCHANGED = "exchanged"
+    DELETED = "deleted"
+
+
+class DealStatus(Enum):
+    PROPOSED = "proposed"
+    CONFIRMED = "confirmed"
+    COMPLETED = "completed"
+    CANCELED = "canceled"
