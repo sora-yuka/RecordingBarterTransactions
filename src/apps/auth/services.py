@@ -30,7 +30,7 @@ class UserService:
     async def get_current_user(self, credentials: str) -> ReadUserSchema:
         payload = decode_token(token=credentials)
 
-        user = await self.repository._get_user_by_field(id=int(payload.get("sub")))
+        user = await self.repository.get_by_field(id=int(payload.get("sub")))
         return ReadUserSchema.model_validate(user)
 
 

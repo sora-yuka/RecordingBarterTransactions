@@ -11,8 +11,7 @@ class UserRepository:
     async def get_by_field(self, **kwargs) -> UserModel | None:
         if not kwargs:
             return None
-        filters = [getattr(UserModel, key) == val for key, val in kwargs.items()]
-        result = await self.session.execute(select(UserModel).where(*filters))
+        result = await self.session.execute(select(UserModel).filter_by(**kwargs))
         return result.scalars().one_or_none()
 
     async def create(self, data: dict) -> UserModel:

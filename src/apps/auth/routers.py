@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.apps.auth.schemas import ReadUserSchema, AuthorizeUserSchema, TokenSchema
-from src.apps.auth.dependencies import UserServiceDep, AuthServiceDep, UserFormDep, CredentialsDep
+from src.apps.auth.dependencies import UserServiceDep, AuthServiceDep, UserFormDep, CredentialsDep, CurrentUserDep
 
 router = APIRouter()
 
@@ -22,5 +22,5 @@ async def refresh(service: AuthServiceDep, headers: CredentialsDep):
 
 
 @router.get("/", response_model=ReadUserSchema)
-async def get_me(service: UserServiceDep, headers: CredentialsDep):
-    return await service.get_current_user(headers.credentials)
+async def get_me(current_user: CurrentUserDep):
+    return current_user

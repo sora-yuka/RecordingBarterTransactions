@@ -5,8 +5,8 @@ from fastapi import Depends, Form, UploadFile, File
 from src.dependencies import SessionDep, CredentialsDep
 from src.apps.auth.repositories import UserRepository
 from src.apps.auth.services import UserService, AuthService
-from src.apps.auth.schemas import CreateUserSchema
-from src.utils.media_handler import save_photo
+from src.apps.auth.schemas import ReadUserSchema, CreateUserSchema
+from src.utils.media_handler import store_profile_photo
 
 
 def get_user_repository(session: SessionDep):
@@ -37,7 +37,7 @@ async def get_create_user_form(
     password_confirm: str = Form(...),
     profile_photo: UploadFile | None = File(None),
 ):
-    filename = await save_photo(profile_photo)
+    filename = await store_profile_photo(profile_photo, "profile-pics")
 
     return CreateUserSchema(
         username=username,
@@ -49,3 +49,11 @@ async def get_create_user_form(
 
 
 UserFormDep = Annotated[CreateUserSchema, Depends(get_create_user_form)]
+
+
+async def get_current_user(credentials: CredentialsDep, service: UserServiceDep):
+    current_user = await service.get_current_user(credentials.credentials)
+    return current_user
+
+
+CurrentUserDep = Annotated[ReadUserSchema, Depends(get_current_user)]
