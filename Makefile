@@ -5,4 +5,4 @@ revision:
 upgrade:
 	alembic upgrade head
 t:
-	python -m src.utils.teststand
+	pytest -m integration
